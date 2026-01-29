@@ -22,7 +22,9 @@
     "dev:recruiter": "npm run dev -w packages/recruiter-agent",
     "dev:web-job-search": "npm run dev -w packages/web-job-search",
     "dev:web-recruiter": "npm run dev -w packages/web-recruiter",
-    "dev:web-marketing": "npm run dev -w packages/web-marketing"
+    "dev:web-marketing": "npm run dev -w packages/web-marketing",
+    "dev:web-tracker": "npm run dev -w packages/web-tracker",
+    "build:web-tracker": "npm run build -w packages/web-tracker"
   },
   "keywords": [
     "ai-agent",
