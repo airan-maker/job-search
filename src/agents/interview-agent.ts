@@ -37,6 +37,7 @@ export async function prepareInterview(job: JobListing): Promise<void> {
       choices: [
         { name: '📋 예상 질문 생성', value: 'questions' },
         { name: '🎤 모의 면접 연습', value: 'practice' },
+        { name: '🎯 실시간 코칭 면접 (답변마다 피드백)', value: 'coaching' },
         { name: '🏢 회사 정보 리서치', value: 'research' },
         { name: '← 돌아가기', value: 'back' }
       ]
@@ -49,6 +50,8 @@ export async function prepareInterview(job: JobListing): Promise<void> {
     await generateExpectedQuestions(job, profile);
   } else if (prepType === 'practice') {
     await startMockInterview(job, profile);
+  } else if (prepType === 'coaching') {
+    await startCoachingInterview(job, profile);
   } else if (prepType === 'research') {
     await researchCompany(job);
   }
@@ -291,6 +294,211 @@ async function startMockInterview(job: JobListing, profile: UserProfile): Promis
     await saveInterviewPrep(prep);
 
     console.log(chalk.green('면접 기록이 저장되었습니다.\n'));
+  }
+}
+
+// 실시간 답변 코칭 면접
+async function startCoachingInterview(job: JobListing, profile: UserProfile): Promise<void> {
+  console.log(chalk.bold.blue('\n=== 실시간 코칭 면접 ===\n'));
+  console.log(chalk.cyan('🎯 답변마다 즉각적인 피드백을 받습니다.'));
+  console.log(chalk.yellow('💡 STAR 기법 (상황-과제-행동-결과)으로 답변하세요.'));
+  console.log(chalk.gray('"종료"를 입력하면 면접을 마칩니다.\n'));
+
+  const { interviewType } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'interviewType',
+      message: '면접 유형을 선택하세요:',
+      choices: [
+        { name: '1차 면접 (인성/경험)', value: 'first' },
+        { name: '기술 면접', value: 'technical' },
+        { name: '임원 면접', value: 'executive' }
+      ]
+    }
+  ]);
+
+  const interviewContext: Record<string, string> = {
+    first: '1차 실무 면접입니다. 인성과 경험 위주로 질문합니다.',
+    technical: '기술 면접입니다. 기술적 깊이를 확인하는 질문을 합니다.',
+    executive: '임원 면접입니다. 비전, 성장 가능성, 조직 적합성을 확인합니다.'
+  };
+
+  // 면접관 역할
+  const interviewerMessages: Anthropic.MessageParam[] = [
+    {
+      role: 'user',
+      content: `당신은 ${job.company}의 면접관입니다. ${job.title} 포지션 지원자와 ${interviewContext[interviewType]}
+
+지원자 정보:
+- 경력: ${profile.workExperience.map(w => `${w.title}@${w.company}`).join(', ')}
+- 기술: ${profile.skills.map(s => s.name).join(', ')}
+
+면접을 시작해주세요. 한 번에 하나의 질문만 하세요.`
+    }
+  ];
+
+  const spinner = ora('면접관 준비 중...').start();
+  const firstResponse = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 300,
+    messages: interviewerMessages
+  });
+  spinner.stop();
+
+  let currentQuestion = '';
+  let textContent = firstResponse.content.find(c => c.type === 'text');
+  if (textContent && textContent.type === 'text') {
+    currentQuestion = textContent.text;
+    console.log(chalk.cyan('\n👔 면접관: ') + currentQuestion + '\n');
+    interviewerMessages.push({ role: 'assistant', content: currentQuestion });
+  }
+
+  let questionCount = 0;
+  const feedbacks: string[] = [];
+
+  while (true) {
+    const { answer } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'answer',
+        message: chalk.green('🧑 나: '),
+        prefix: ''
+      }
+    ]);
+
+    if (answer.toLowerCase() === '종료' || answer.toLowerCase() === 'quit') {
+      break;
+    }
+
+    questionCount++;
+
+    // 즉각적인 답변 코칭
+    const coachSpinner = ora('답변 분석 중...').start();
+
+    const coachingResponse = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 800,
+      messages: [
+        {
+          role: 'user',
+          content: `면접 답변을 분석하고 즉각적인 피드백을 제공해주세요.
+
+## 면접 질문
+${currentQuestion}
+
+## 지원자 답변
+${answer}
+
+## 분석 기준
+1. **STAR 기법 적용**: 상황(Situation), 과제(Task), 행동(Action), 결과(Result)가 포함되었나?
+2. **구체성**: 숫자, 날짜, 결과 등 구체적인 내용이 있나?
+3. **관련성**: 질문에 맞는 답변인가?
+4. **길이**: 적절한 길이인가? (너무 짧거나 길지 않은지)
+
+## 응답 형식
+📊 **종합 점수**: X/10
+
+✅ **잘한 점**:
+- ...
+
+⚠️ **개선점**:
+- ...
+
+💡 **개선된 답변 예시** (1-2문장):
+...`
+        }
+      ]
+    });
+
+    coachSpinner.stop();
+
+    const coachContent = coachingResponse.content.find(c => c.type === 'text');
+    if (coachContent && coachContent.type === 'text') {
+      console.log(chalk.yellow('\n━━━ 실시간 피드백 ━━━'));
+      console.log(coachContent.text);
+      console.log(chalk.yellow('━━━━━━━━━━━━━━━━━━━━━\n'));
+      feedbacks.push(coachContent.text);
+    }
+
+    // 다음 질문 받기
+    interviewerMessages.push({ role: 'user', content: `지원자 답변: "${answer}"\n\n다음 질문을 해주세요.` });
+
+    const nextSpinner = ora('').start();
+    const nextResponse = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 300,
+      messages: interviewerMessages
+    });
+    nextSpinner.stop();
+
+    textContent = nextResponse.content.find(c => c.type === 'text');
+    if (textContent && textContent.type === 'text') {
+      currentQuestion = textContent.text;
+      console.log(chalk.cyan('👔 면접관: ') + currentQuestion + '\n');
+      interviewerMessages.push({ role: 'assistant', content: currentQuestion });
+    }
+  }
+
+  // 종합 피드백
+  if (questionCount > 0) {
+    console.log(chalk.bold.blue('\n=== 면접 종합 분석 ===\n'));
+
+    const summarySpinner = ora('종합 분석 중...').start();
+
+    const summaryResponse = await client.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1500,
+      messages: [
+        {
+          role: 'user',
+          content: `${questionCount}개 질문에 대한 면접 답변 피드백을 종합 분석해주세요.
+
+## 개별 피드백들
+${feedbacks.join('\n\n---\n\n')}
+
+## 분석 요청
+1. **전체 점수**: X/100
+2. **강점 TOP 3**
+3. **개선 필요 영역 TOP 3**
+4. **합격 가능성**: A(매우 높음) / B(높음) / C(보통) / D(낮음)
+5. **다음 면접까지 연습할 것들** (구체적인 액션 아이템 3개)`
+        }
+      ]
+    });
+
+    summarySpinner.stop();
+
+    const summaryContent = summaryResponse.content.find(c => c.type === 'text');
+    if (summaryContent && summaryContent.type === 'text') {
+      console.log(summaryContent.text);
+      console.log();
+    }
+
+    // 저장
+    const practiceSession: PracticeSession = {
+      id: generateId(),
+      jobListingId: job.id,
+      startedAt: getCurrentTimestamp(),
+      endedAt: getCurrentTimestamp(),
+      questions: [],
+      overallFeedback: summaryContent?.type === 'text' ? summaryContent.text : ''
+    };
+
+    let prep = await getInterviewPrep(job.id);
+    if (!prep) {
+      prep = {
+        jobListingId: job.id,
+        expectedQuestions: [],
+        practiceSessions: [],
+        createdAt: getCurrentTimestamp(),
+        updatedAt: getCurrentTimestamp()
+      };
+    }
+    prep.practiceSessions.push(practiceSession);
+    prep.updatedAt = getCurrentTimestamp();
+    await saveInterviewPrep(prep);
+
+    console.log(chalk.green('코칭 면접 기록이 저장되었습니다.\n'));
   }
 }
 

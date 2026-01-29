@@ -27,6 +27,11 @@ import {
   prepareInterview
 } from './agents/interview-agent.js';
 
+import {
+  showStrategyMenu,
+  analyzeOverallStrategy
+} from './agents/strategy-agent.js';
+
 import { getProfile } from './storage/index.js';
 
 const program = new Command();
@@ -34,7 +39,7 @@ const program = new Command();
 program
   .name('job-search')
   .description('AI 기반 이직 준비 에이전트 - 프라이버시를 지키며 채용 공고를 찾아드립니다')
-  .version('2.0.0');
+  .version('3.0.0');
 
 function printBanner(): void {
   console.log(chalk.bold.blue(`
@@ -86,6 +91,11 @@ async function showMainMenu(): Promise<void> {
           name: '📊 지원 현황 대시보드',
           value: 'dashboard'
         },
+        {
+          name: '📈 종합 이직 전략 분석',
+          value: 'overallStrategy',
+          disabled: !hasProfile ? '프로필 먼저 생성' : false
+        },
         new inquirer.Separator('── 프로필 ──'),
         {
           name: hasProfile ? '👤 내 프로필 보기' : '👤 프로필 생성하기',
@@ -125,6 +135,10 @@ async function handleMenuChoice(choice: string): Promise<void> {
       await showDashboard();
       break;
 
+    case 'overallStrategy':
+      await analyzeOverallStrategy();
+      break;
+
     case 'viewProfile':
       await viewProfile();
       break;
@@ -157,6 +171,7 @@ async function handleJobAction(job: any): Promise<void> {
         { name: '📝 맞춤 이력서 생성', value: 'resume' },
         { name: '✉️  자기소개서 작성', value: 'coverLetter' },
         { name: '🎤 면접 준비', value: 'interview' },
+        { name: '📈 전략 분석 (합격률/연봉협상)', value: 'strategy' },
         { name: '← 돌아가기', value: 'back' }
       ]
     }
@@ -171,6 +186,9 @@ async function handleJobAction(job: any): Promise<void> {
       break;
     case 'interview':
       await prepareInterview(job);
+      break;
+    case 'strategy':
+      await showStrategyMenu(job);
       break;
   }
 }

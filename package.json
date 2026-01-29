@@ -1,6 +1,6 @@
 {
   "name": "job-search-agent",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "AI-powered job search agent for privacy-conscious job seekers",
   "main": "dist/index.js",
   "bin": {
