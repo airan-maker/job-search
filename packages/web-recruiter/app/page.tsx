@@ -40,23 +40,13 @@ const welcomeMessage = `## 👔 Recruiter Agent에 오신 것을 환영합니다
 
 어떤 채용 업무를 도와드릴까요?`;
 
-export default function RecruiterPage() {
+export default function Home() {
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <span>👔</span> Recruiter Agent
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-1">
-          채용의 모든 과정을 AI가 도와드립니다
-        </p>
-      </div>
-      <Chat
-        apiEndpoint="/api/chat"
-        systemPrompt={systemPrompt}
-        placeholder="채용할 포지션이나 필요한 도움을 알려주세요..."
-        welcomeMessage={welcomeMessage}
-      />
-    </div>
+    <Chat
+      apiEndpoint="/api/chat"
+      systemPrompt={systemPrompt}
+      placeholder="채용할 포지션이나 필요한 도움을 알려주세요..."
+      welcomeMessage={welcomeMessage}
+    />
   );
 }

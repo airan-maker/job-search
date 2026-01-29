@@ -76,7 +76,7 @@ export default function Chat({
       {/* Messages */}
       <div className="flex-1 overflow-y-auto space-y-4 pb-4">
         {welcomeMessage && messages.length === 0 && (
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-gray-600 dark:text-gray-300">
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-lg p-4 text-gray-600 dark:text-gray-300">
             <ReactMarkdown className="prose dark:prose-invert max-w-none">
               {welcomeMessage}
             </ReactMarkdown>
@@ -90,7 +90,7 @@ export default function Chat({
             <div
               className={`max-w-[80%] rounded-lg p-4 ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-cyan-600 text-white'
                   : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
               }`}
             >
@@ -108,9 +108,9 @@ export default function Chat({
           <div className="flex justify-start">
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-200" />
               </div>
             </div>
           </div>
@@ -125,13 +125,13 @@ export default function Chat({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={placeholder}
-          className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
           disabled={isLoading}
         />
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="px-6 py-3 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           전송
         </button>

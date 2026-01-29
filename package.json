@@ -11,15 +11,18 @@
     "build:job-search": "npm run build -w packages/job-search",
     "build:marketing": "npm run build -w packages/marketing-agent",
     "build:recruiter": "npm run build -w packages/recruiter-agent",
-    "build:web": "npm run build -w packages/web",
+    "build:web-job-search": "npm run build -w packages/web-job-search",
+    "build:web-recruiter": "npm run build -w packages/web-recruiter",
+    "build:web-marketing": "npm run build -w packages/web-marketing",
     "start:job-search": "npm run start -w packages/job-search",
     "start:marketing": "npm run start -w packages/marketing-agent",
     "start:recruiter": "npm run start -w packages/recruiter-agent",
-    "start:web": "npm run start -w packages/web",
     "dev:job-search": "npm run dev -w packages/job-search",
     "dev:marketing": "npm run dev -w packages/marketing-agent",
     "dev:recruiter": "npm run dev -w packages/recruiter-agent",
-    "dev:web": "npm run dev -w packages/web"
+    "dev:web-job-search": "npm run dev -w packages/web-job-search",
+    "dev:web-recruiter": "npm run dev -w packages/web-recruiter",
+    "dev:web-marketing": "npm run dev -w packages/web-marketing"
   },
   "keywords": [
     "ai-agent",

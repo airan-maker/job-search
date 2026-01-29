@@ -40,23 +40,13 @@ const welcomeMessage = `## 📣 Marketing Agent에 오신 것을 환영합니다
 
 어떤 마케팅 업무를 도와드릴까요? 홍보하실 서비스에 대해 알려주세요!`;
 
-export default function MarketingPage() {
+export default function Home() {
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <span>📣</span> Marketing Agent
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-1">
-          AI와 함께 마케팅 전략을 수립하세요
-        </p>
-      </div>
-      <Chat
-        apiEndpoint="/api/chat"
-        systemPrompt={systemPrompt}
-        placeholder="홍보하실 서비스나 필요한 콘텐츠를 알려주세요..."
-        welcomeMessage={welcomeMessage}
-      />
-    </div>
+    <Chat
+      apiEndpoint="/api/chat"
+      systemPrompt={systemPrompt}
+      placeholder="홍보하실 서비스나 필요한 콘텐츠를 알려주세요..."
+      welcomeMessage={welcomeMessage}
+    />
   );
 }

@@ -19,7 +19,6 @@ body {
   background: rgb(var(--background-rgb));
 }
 
-/* Markdown Styles */
 .prose h1 { @apply text-2xl font-bold mb-4; }
 .prose h2 { @apply text-xl font-semibold mb-3 mt-6; }
 .prose h3 { @apply text-lg font-semibold mb-2 mt-4; }

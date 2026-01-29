@@ -37,23 +37,13 @@ const welcomeMessage = `## 🎯 Job Search Agent에 오신 것을 환영합니�
 
 시작하려면 **현재 경력과 희망 포지션**을 알려주세요!`;
 
-export default function JobSearchPage() {
+export default function Home() {
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <span>🎯</span> Job Search Agent
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300 mt-1">
-          프라이버시를 지키며 이직을 준비하세요
-        </p>
-      </div>
-      <Chat
-        apiEndpoint="/api/chat"
-        systemPrompt={systemPrompt}
-        placeholder="경력, 기술 스택, 희망 포지션을 알려주세요..."
-        welcomeMessage={welcomeMessage}
-      />
-    </div>
+    <Chat
+      apiEndpoint="/api/chat"
+      systemPrompt={systemPrompt}
+      placeholder="경력, 기술 스택, 희망 포지션을 알려주세요..."
+      welcomeMessage={welcomeMessage}
+    />
   );
 }
