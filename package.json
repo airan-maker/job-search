@@ -1,38 +1,25 @@
 {
-  "name": "job-search-agent",
-  "version": "3.0.0",
-  "description": "AI-powered job search agent for privacy-conscious job seekers",
-  "main": "dist/index.js",
-  "bin": {
-    "job-search": "./dist/index.js"
-  },
-  "type": "module",
+  "name": "ai-agents-monorepo",
+  "version": "1.0.0",
+  "description": "AI Agents Monorepo - Job Search & Marketing Agents",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsx src/index.ts"
+    "build": "npm run build --workspaces",
+    "build:job-search": "npm run build -w packages/job-search",
+    "build:marketing": "npm run build -w packages/marketing-agent",
+    "start:job-search": "npm run start -w packages/job-search",
+    "start:marketing": "npm run start -w packages/marketing-agent",
+    "dev:job-search": "npm run dev -w packages/job-search",
+    "dev:marketing": "npm run dev -w packages/marketing-agent"
   },
   "keywords": [
-    "job-search",
     "ai-agent",
-    "resume",
-    "interview"
+    "job-search",
+    "marketing",
+    "monorepo"
   ],
-  "license": "MIT",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.52.0",
-    "chalk": "^5.3.0",
-    "commander": "^12.1.0",
-    "inquirer": "^9.2.15",
-    "ora": "^8.0.1",
-    "pdfkit": "^0.15.0",
-    "marked": "^12.0.0"
-  },
-  "devDependencies": {
-    "@types/inquirer": "^9.0.7",
-    "@types/node": "^20.11.0",
-    "@types/pdfkit": "^0.13.4",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
-  }
+  "license": "MIT"
 }
