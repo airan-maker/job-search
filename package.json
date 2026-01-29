@@ -1,7 +1,7 @@
 {
   "name": "ai-agents-monorepo",
   "version": "1.0.0",
-  "description": "AI Agents Monorepo - Job Search & Marketing Agents",
+  "description": "AI Agents Monorepo - Job Search, Marketing & Recruiter Agents",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -10,15 +10,19 @@
     "build": "npm run build --workspaces",
     "build:job-search": "npm run build -w packages/job-search",
     "build:marketing": "npm run build -w packages/marketing-agent",
+    "build:recruiter": "npm run build -w packages/recruiter-agent",
     "start:job-search": "npm run start -w packages/job-search",
     "start:marketing": "npm run start -w packages/marketing-agent",
+    "start:recruiter": "npm run start -w packages/recruiter-agent",
     "dev:job-search": "npm run dev -w packages/job-search",
-    "dev:marketing": "npm run dev -w packages/marketing-agent"
+    "dev:marketing": "npm run dev -w packages/marketing-agent",
+    "dev:recruiter": "npm run dev -w packages/recruiter-agent"
   },
   "keywords": [
     "ai-agent",
     "job-search",
     "marketing",
+    "recruiter",
     "monorepo"
   ],
   "license": "MIT"
