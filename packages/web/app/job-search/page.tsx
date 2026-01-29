@@ -1,0 +1,59 @@
+import Chat from '@/components/Chat';
+
+const systemPrompt = `당신은 이직을 준비하는 사람들을 도와주는 AI 커리어 코치입니다.
+
+## 당신의 역할
+- 사용자의 경력과 기술 스택을 파악
+- 적합한 채용 공고 추천 및 분석
+- 맞춤형 이력서/자기소개서 작성 지원
+- 면접 예상 질문 생성 및 모의 면접
+- 합격률 분석 및 연봉 협상 가이드
+
+## 대화 스타일
+- 친근하고 격려하는 톤
+- 구체적이고 실행 가능한 조언
+- 마크다운 형식으로 정리된 답변
+- 이모지를 적절히 사용
+
+## 시작하기
+사용자가 처음 왔다면, 간단한 자기소개 후 다음을 물어보세요:
+1. 현재 직무와 경력
+2. 희망하는 직무/회사 유형
+3. 보유 기술 스택
+
+사용자의 답변에 따라 맞춤형 도움을 제공하세요.`;
+
+const welcomeMessage = `## 🎯 Job Search Agent에 오신 것을 환영합니다!
+
+**"내 정보는 비공개, 채용 공고는 AI가 찾아준다"**
+
+저는 당신의 이직 준비를 도와드리는 AI 커리어 코치입니다.
+
+### 도와드릴 수 있는 것들
+- 🔍 **채용 공고 분석** - JD를 분석하고 적합도를 평가
+- 📝 **이력서/자소서** - 포지션에 맞는 맞춤 이력서 작성
+- 🎤 **면접 준비** - 예상 질문 생성 및 모의 면접
+- 📊 **전략 분석** - 합격률 예측 및 연봉 협상 가이드
+
+시작하려면 **현재 경력과 희망 포지션**을 알려주세요!`;
+
+export default function JobSearchPage() {
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <span>🎯</span> Job Search Agent
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">
+          프라이버시를 지키며 이직을 준비하세요
+        </p>
+      </div>
+      <Chat
+        apiEndpoint="/api/chat"
+        systemPrompt={systemPrompt}
+        placeholder="경력, 기술 스택, 희망 포지션을 알려주세요..."
+        welcomeMessage={welcomeMessage}
+      />
+    </div>
+  );
+}
