@@ -297,40 +297,74 @@ async function startMockInterview(job: JobListing, profile: UserProfile): Promis
 async function researchCompany(job: JobListing): Promise<void> {
   console.log(chalk.bold.blue('\n=== 회사 리서치 ===\n'));
 
+  const { researchType } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'researchType',
+      message: '리서치 방식을 선택하세요:',
+      choices: [
+        { name: '🌐 실시간 웹 검색 (최신 정보)', value: 'web' },
+        { name: '🤖 AI 분석 (일반 정보)', value: 'ai' },
+        { name: '← 돌아가기', value: 'back' }
+      ]
+    }
+  ]);
+
+  if (researchType === 'back') return;
+
   const spinner = ora(`${job.company} 정보 조사 중...`).start();
 
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 2000,
+      max_tokens: 3000,
+      ...(researchType === 'web' ? {
+        tools: [
+          {
+            type: 'web_search_20250305' as const,
+            name: 'web_search',
+            max_uses: 5
+          }
+        ]
+      } : {}),
       messages: [
         {
           role: 'user',
-          content: `${job.company} 회사에 대해 면접 준비에 도움이 될 정보를 정리해주세요.
+          content: `${job.company} 회사에 대해 면접 준비에 도움이 될 정보를 ${researchType === 'web' ? '웹에서 검색하여 ' : ''}정리해주세요.
 
 ## 포지션
 ${job.title}
 
 ## 조사 항목
-1. **회사 개요**: 설립연도, 규모, 주요 사업
-2. **기업 문화**: 알려진 조직 문화, 근무 환경
-3. **최근 동향**: 뉴스, 투자, 신사업 등
-4. **면접 특징**: 알려진 면접 스타일, 자주 나오는 질문
+1. **회사 개요**: 설립연도, 규모, 주요 사업, 대표 서비스/제품
+2. **기업 문화**: 조직 문화, 근무 환경, 복지
+3. **최근 동향**: 최신 뉴스, 투자 유치, 신사업, 조직 변화
+4. **면접 특징**: 면접 스타일, 면접 프로세스, 자주 나오는 질문
 5. **경쟁사**: 주요 경쟁사와 차별점
-6. **면접 시 질문할 만한 것들**: 지원자가 역으로 물어보면 좋은 질문 5개
+6. **기술 스택**: 사용하는 기술 (알려진 경우)
+7. **면접 시 질문할 만한 것들**: 지원자가 역으로 물어보면 좋은 질문 5개
 
-알려진 정보를 바탕으로 작성하고, 확실하지 않은 정보는 명시해주세요.`
+${researchType === 'web'
+  ? `"${job.company} 면접 후기", "${job.company} 기업 정보", "${job.company} 최근 뉴스 2025" 등을 검색해주세요.`
+  : '알려진 정보를 바탕으로 작성하고, 확실하지 않은 정보는 명시해주세요.'}`
         }
       ]
     });
 
     spinner.stop();
 
-    const textContent = response.content.find(c => c.type === 'text');
-    if (textContent && textContent.type === 'text') {
+    // 응답에서 텍스트 추출
+    let fullText = '';
+    for (const block of response.content) {
+      if (block.type === 'text') {
+        fullText += block.text;
+      }
+    }
+
+    if (fullText) {
       console.log(chalk.bold.green(`\n✨ ${job.company} 리서치 결과\n`));
       console.log(chalk.gray('─'.repeat(60)));
-      console.log(textContent.text);
+      console.log(fullText);
       console.log(chalk.gray('─'.repeat(60) + '\n'));
     }
 

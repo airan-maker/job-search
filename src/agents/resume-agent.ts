@@ -3,8 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
 import type { UserProfile, JobListing, GeneratedResume } from '../types/index.js';
-import { getProfile, saveGeneratedResume, getGeneratedResumes } from '../storage/index.js';
+import { getProfile, saveGeneratedResume, getGeneratedResumes, getJobListing } from '../storage/index.js';
 import { generateId, getCurrentTimestamp } from '../utils/index.js';
+import { generateResumePDF, generateCoverLetterPDF, getOutputDir } from '../utils/pdf-generator.js';
 
 const client = new Anthropic();
 
@@ -124,27 +125,50 @@ ${profileText}
     console.log(textContent.text);
     console.log(chalk.gray('─'.repeat(60)));
 
-    // 저장 여부 확인
-    const { shouldSave } = await inquirer.prompt([
+    // 저장 및 내보내기 옵션
+    const { action } = await inquirer.prompt([
       {
-        type: 'confirm',
-        name: 'shouldSave',
-        message: '이 이력서를 저장하시겠습니까?',
-        default: true
+        type: 'list',
+        name: 'action',
+        message: '다음 작업을 선택하세요:',
+        choices: [
+          { name: '💾 저장만 하기', value: 'save' },
+          { name: '📄 PDF로 내보내기', value: 'pdf' },
+          { name: '💾 + 📄 저장 후 PDF 내보내기', value: 'both' },
+          { name: '← 저장하지 않고 나가기', value: 'skip' }
+        ]
       }
     ]);
 
-    if (shouldSave) {
-      const resume: GeneratedResume = {
-        id: generateId(),
-        jobListingId: job.id,
-        content: textContent.text,
-        format: 'markdown',
-        highlights: [],
-        createdAt: getCurrentTimestamp()
-      };
+    if (action === 'skip') {
+      return;
+    }
+
+    const resume: GeneratedResume = {
+      id: generateId(),
+      jobListingId: job.id,
+      content: textContent.text,
+      format: 'markdown',
+      highlights: [],
+      createdAt: getCurrentTimestamp()
+    };
+
+    if (action === 'save' || action === 'both') {
       await saveGeneratedResume(resume);
-      console.log(chalk.green('\n이력서가 저장되었습니다.\n'));
+      console.log(chalk.green('\n이력서가 저장되었습니다.'));
+    }
+
+    if (action === 'pdf' || action === 'both') {
+      const pdfSpinner = ora('PDF 생성 중...').start();
+      try {
+        const pdfPath = await generateResumePDF(profile, resume, job);
+        pdfSpinner.stop();
+        console.log(chalk.green(`\n📄 PDF가 생성되었습니다:`));
+        console.log(chalk.cyan(`   ${pdfPath}\n`));
+      } catch (pdfError) {
+        pdfSpinner.stop();
+        console.log(chalk.red('\nPDF 생성에 실패했습니다:'), pdfError);
+      }
     }
 
   } catch (error) {
@@ -227,7 +251,30 @@ ${typeGuide[coverLetterType]}
     console.log(chalk.bold.green('\n✨ 자기소개서가 생성되었습니다!\n'));
     console.log(chalk.gray('─'.repeat(60)));
     console.log(textContent.text);
-    console.log(chalk.gray('─'.repeat(60) + '\n'));
+    console.log(chalk.gray('─'.repeat(60)));
+
+    // PDF 내보내기 옵션
+    const { exportPdf } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'exportPdf',
+        message: 'PDF로 내보내시겠습니까?',
+        default: false
+      }
+    ]);
+
+    if (exportPdf) {
+      const pdfSpinner = ora('PDF 생성 중...').start();
+      try {
+        const pdfPath = await generateCoverLetterPDF(profile, textContent.text, job);
+        pdfSpinner.stop();
+        console.log(chalk.green(`\n📄 PDF가 생성되었습니다:`));
+        console.log(chalk.cyan(`   ${pdfPath}\n`));
+      } catch (pdfError) {
+        pdfSpinner.stop();
+        console.log(chalk.red('\nPDF 생성에 실패했습니다:'), pdfError);
+      }
+    }
 
   } catch (error) {
     spinner.stop();

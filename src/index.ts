@@ -14,7 +14,8 @@ import {
 import {
   searchJobs,
   viewSavedJobs,
-  searchWithCustomQuery
+  searchWithCustomQuery,
+  showDashboard
 } from './agents/job-search-agent.js';
 
 import {
@@ -33,7 +34,7 @@ const program = new Command();
 program
   .name('job-search')
   .description('AI 기반 이직 준비 에이전트 - 프라이버시를 지키며 채용 공고를 찾아드립니다')
-  .version('1.0.0');
+  .version('2.0.0');
 
 function printBanner(): void {
   console.log(chalk.bold.blue(`
@@ -81,6 +82,10 @@ async function showMainMenu(): Promise<void> {
           name: '📋 저장된 공고 보기',
           value: 'savedJobs'
         },
+        {
+          name: '📊 지원 현황 대시보드',
+          value: 'dashboard'
+        },
         new inquirer.Separator('── 프로필 ──'),
         {
           name: hasProfile ? '👤 내 프로필 보기' : '👤 프로필 생성하기',
@@ -114,6 +119,10 @@ async function handleMenuChoice(choice: string): Promise<void> {
       if (selectedJob) {
         await handleJobAction(selectedJob);
       }
+      break;
+
+    case 'dashboard':
+      await showDashboard();
       break;
 
     case 'viewProfile':

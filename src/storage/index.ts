@@ -81,6 +81,15 @@ export async function deleteJobListing(id: string): Promise<void> {
   await saveData(data);
 }
 
+export async function updateJobListing(id: string, updates: Partial<JobListing>): Promise<void> {
+  const data = await loadData();
+  const index = data.jobListings.findIndex(j => j.id === id);
+  if (index >= 0) {
+    data.jobListings[index] = { ...data.jobListings[index], ...updates };
+    await saveData(data);
+  }
+}
+
 // Interview Prep operations
 export async function getInterviewPrep(jobListingId: string): Promise<InterviewPrep | undefined> {
   const data = await loadData();
